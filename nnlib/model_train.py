@@ -1,5 +1,9 @@
 import numpy as np
 from mlp import MLP
+from learning_rate_S import LeanringRateS
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, roc_curve, auc
 
 #building the classiifer
 class loss_functions:
@@ -32,7 +36,7 @@ class loss_functions:
 
 class NeruronNetworkLearning:
 
-    def __init__(self, layer_size, los, dropout_training, dropout_rates,  activation, Lr = 0.01, batch_size = 32, regularization='none', lambda_val=0.01):
+    def __init__(self, layer_size, los, dropout_training, dropout_rates,  activation, Lr = 0.01, batch_size = 32, regularization='none', lambda_val=0.01, optimizer_type='adam', scheduler_type = 'step'):
         
         self.layer_size = layer_size
         self.activations = activation
@@ -47,6 +51,8 @@ class NeruronNetworkLearning:
         self.los = los
         self.dropout_training = dropout_training
         self.dropout_rates = dropout_rates
+        self.scheduler_type = scheduler_type
+        self.optimizer_type = optimizer_type
 
         self.mlp = MLP(self.layer_size, 
                        self.dropout_training,
@@ -55,11 +61,17 @@ class NeruronNetworkLearning:
                        self.Lr,
                        self.regularization, 
                        self.lambda_val, 
-                       optimizer_type = 'adam')
+                       optimizer_type)
+        
+        if self.scheduler_type:
+            self.scheduler = LeanringRateS(self.Lr, self.scheduler_type)
+        else:
+            self.scheduler = None
 
 ######### Regularaiation ########    
     def reg_loss(self, loss, reg_x):
-        self.reg_x = reg_x
+        #self.reg_x = reg_x
+        m = reg_x.shape[0]
         #calcualte the weights of each layer
         reg_w = 0.0
         for layer in self.mlp.layers:
@@ -70,9 +82,9 @@ class NeruronNetworkLearning:
    
         if self.regularization == 'L2':
             #explain the formula in the markdown
-            reg_loss = loss + ((self.lambda_val / (2 * self.reg_x[0])) * (reg_w))
+            reg_loss = loss + ((self.lambda_val / (2 * m)) * (reg_w))
         elif self.regularization == 'L1':
-            reg_loss = loss + ((self.lambda_val / self.reg_x[0]) * (reg_w))
+            reg_loss = loss + ((self.lambda_val / m) * (reg_w))
         else:
             reg_loss = loss
         
@@ -86,6 +98,10 @@ class NeruronNetworkLearning:
         self.los_object = loss_functions(self.y_train, self.mlp.layer.y_pred)
 
         for epoch in range(epochs):
+
+            #update lr
+            if self.scheduler:
+                self.Lr = self.scheduler.learning_rate_step(epoch)
 
              #to avoid learning one type of output, it will memoeries leading to overtting, also we didn't use suffle function because it will break the dataset sequance
             index = np.random.permutation(n_samples)
@@ -110,18 +126,21 @@ class NeruronNetworkLearning:
 
                 gradiants = self.mlp.backward(dL_dy)
                 
-                self.mlp.step(gradiants, self.Lr)
+                self.mlp.step()
+                #self.mlp.step(gradiants, self.Lr)
             
             ### Rerunning the whole data on the network to check if it learned
             y_pred_full_train = self.mlp.forward(X_train, dropout_training = False)
             full_train_loss1 = 0.0
             if self.los == "MSE":
-                full_train_loss1 = self.los_object.MSE(y_predd, y_train)
+                full_train_loss1 = self.los_object.MSE(y_pred_full_train, y_train)
             elif self.los == "BCE":
-                full_train_loss1 = self.los_object.binary_cross_entropy(y_predd, y_train)
+                full_train_loss1 = self.los_object.binary_cross_entropy(y_pred_full_train, y_train)
+
             ### Adding the regularaization to the loss
             #full_train_loss = self.binary_cross_entropy(y_pred_full_train, y_train)
-            full_train_loss = self.reg_loss(full_train_loss1, X_train)
+            #full_train_loss = self.reg_loss(full_train_loss1, X_train)
+            full_train_loss = np.array(self.reg_loss(full_train_loss1, X_train)).item()
             full_train_acc = self.accuracy(y_pred_full_train, y_train)
 
             self.loss_history.append(full_train_loss)
@@ -132,11 +151,13 @@ class NeruronNetworkLearning:
                 y_pred_val = self.mlp.forward(x_val, dropout_training = False)
                 val_loss = 0.0
                 if self.los == "MSE":
-                    val_loss = self.los_object.MSE(y_predd, y_train, x_val)
-                elif self.los == "BCE":
-                    val_loss = self.los_object.binary_cross_entropy(y_predd, y_train)
+                    val_loss = self.los_object.MSE(y_pred_val, y_val)
+                elif self.los == "BCI":
+                    val_loss = self.los_object.binary_cross_entropy(y_pred_val, y_val)
+
                 #val_loss = self.binary_cross_entropy(y_pred_val, y_val)
-                val_loss = self.reg_loss(val_loss, x_val)
+                #val_loss = self.reg_loss(val_loss, x_val)
+                val_loss = np.array(self.reg_loss(val_loss, x_val)).item()
                 val_acc = self.accuracy(y_pred_val, y_val)
 
                 self.eval_loss_history.append(val_loss)
@@ -149,15 +170,100 @@ class NeruronNetworkLearning:
 
     
     def accuracy(self, y_pred, y_true):
-        y_pred = (y_pred >= 0.5).astype(int)
-        return np.mean(y_pred == y_true) * 100
+        if y_true.shape[1] == 1: # Binary (WDBC in this case)
+            predictions = (y_pred >= 0.5).astype(int)
+        else: # Multi-class (MNIST in his case)
+            predictions = np.argmax(y_pred, axis=1)
+            y_true_labels = np.argmax(y_true, axis=1)
+            return np.mean(predictions == y_true_labels) * 100
+    
+        return np.mean(predictions == y_true) * 100
+        #y_pred = (y_pred >= 0.5).astype(int)
+        #return np.mean(y_pred == y_true) * 100
+
+
+    def evaluate_test_set(self, X_test, y_test):
+        """Computes Accuracy, Precision, Recall, F1, and Confusion Matrix"""
+        # Get raw probabilities
+        y_pred_probs = self.mlp.forward(X_test, dropout_training=False)
+        
+        # Handle Binary vs Multi-class labels
+        if y_test.shape[1] == 1: # Binary (WDBC)
+            y_pred_labels = (y_pred_probs >= 0.5).astype(int)
+            y_true_labels = y_test
+        else: # Multi-class (MNIST)
+            y_pred_labels = np.argmax(y_pred_probs, axis=1)
+            y_true_labels = np.argmax(y_test, axis=1)
+
+        # Calculate Metrics
+        metrics = {
+            "Accuracy": self.accuracy(y_pred_probs, y_test),
+            "Precision": precision_score(y_true_labels, y_pred_labels, average='macro'),
+            "Recall": recall_score(y_true_labels, y_pred_labels, average='macro'),
+            "F1 Score": f1_score(y_true_labels, y_pred_labels, average='macro'),
+            "Confusion Matrix": confusion_matrix(y_true_labels, y_pred_labels)
+        }
+        return metrics, y_pred_probs, y_true_labels
     
 
     def predict(self, X):
-        """Make predictions"""
-        y_pred = self.mlp.forward(X, dropout_training = False)
-        return (y_pred >= 0.5).astype(int)
+        y_pred = self.mlp.forward(X, dropout_training=False)
+        if y_pred.shape[1] == 1:
+            return (y_pred >= 0.5).astype(int)
+        return np.argmax(y_pred, axis=1)
+        #return (y_pred >= 0.5).astype(int)
     
     def predict_proba(self, X):
         """Predict probabilities"""
         return self.mlp.forward(X, dropout_training = False)
+    
+
+    def plot_learning_curves(self):
+        """Plots Training and Validation progress"""
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+
+        # Loss Curve
+        ax1.plot(self.loss_history, label='Train Loss', color='blue')
+        if self.eval_loss_history:
+            ax1.plot(self.eval_loss_history, label='Val Loss', color='red')
+        ax1.set_title('Loss Curve')
+        ax1.set_xlabel('Epochs')
+        ax1.set_ylabel('Loss')
+        ax1.legend()
+
+        # Accuracy Curve
+        ax2.plot(self.accuracy_history, label='Train Acc', color='blue')
+        if self.eval_acc_history:
+            ax2.plot(self.eval_acc_history, label='Val Acc', color='red')
+        ax2.set_title('Accuracy Curve')
+        ax2.set_xlabel('Epochs')
+        ax2.set_ylabel('Accuracy (%)')
+        ax2.legend()
+        
+        plt.tight_layout()
+        plt.show()
+
+    def plot_confusion_matrix(self, conf_matrix, labels=None):
+        """Plots the heatmap of correct vs incorrect predictions"""
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', 
+                    xticklabels=labels, yticklabels=labels)
+        plt.title('Confusion Matrix')
+        plt.ylabel('Actual Label')
+        plt.xlabel('Predicted Label')
+        plt.show()
+
+    def plot_roc_curve(self, y_true, y_probs):
+        """Plots ROC curve for binary classification (WDBC)"""
+        if y_true.shape[1] == 1:
+            fpr, tpr, _ = roc_curve(y_true, y_probs)
+            roc_auc = auc(fpr, tpr)
+            
+            plt.figure()
+            plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (AUC = {roc_auc:.2f})')
+            plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('Receiver Operating Characteristic (ROC)')
+            plt.legend(loc="lower right")
+            plt.show()

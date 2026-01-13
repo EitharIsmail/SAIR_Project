@@ -20,6 +20,7 @@ class DesnsLayer:
         self.dropout_masks = [] #to store for back
         self.dropout_training = dropout_training
         self.y_pred = 0
+        self.mask = None
         
         self.w = self.initialize_parameters(self.n_inputs, self.n_outputs, self.activation)
 
@@ -76,10 +77,10 @@ class DesnsLayer:
                 self.mask = self.mask / (1 - self.dropout_rate)
                 self.y_pred = self.y_pred * self.mask
 
-                self.dropout_masks.append(mask)
+                self.dropout_masks.append(self.mask)
             else:
                 mask = None
-                self.dropout_masks.append(mask)
+                self.dropout_masks.append(self.mask)
         
         return self.y_pred
     

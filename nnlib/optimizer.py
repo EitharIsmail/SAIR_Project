@@ -81,6 +81,7 @@ class Optimizers:
 
         # 4. Adam:        
         elif optimizer == 'adam':
+            self.t += 1
             epsilon=1e-8
             for i, (dL_dw, dL_db) in enumerate(parameters_gradient):
                 # Momentum

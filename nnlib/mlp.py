@@ -26,7 +26,7 @@ class MLP:
         for i in range(len(n_neuorns_per_layer) - 1):
             #to match mask of the current layer
             layer_dropout_rate =  self.dropout_rates[i]
-            self.layer = DesnsLayer(self.n_neuorns_per_layer[i], self.n_neuorns_per_layer[i + 1], los, layer_dropout_rate, self.list_activations[i], self.Lr, self.regularization, self.lambda_val)
+            self.layer = DesnsLayer(self.n_neuorns_per_layer[i], self.n_neuorns_per_layer[i + 1], los, dropout_training, layer_dropout_rate, self.list_activations[i], self.Lr, self.regularization, self.lambda_val)
 
             #creating a list of objects to call it later to access the class functions
             self.layers.append(self.layer)
@@ -60,8 +60,8 @@ class MLP:
             self.parameters_gradient.append((dL_dw, dL_db))
             current_grad = dL_dx
 
-            self.parameters_gradient = list(reversed(self.parameters_gradient))
-            self.optimizer.parameters_gradient = self.parameters_gradient
+        self.parameters_gradient = list(reversed(self.parameters_gradient))
+        self.optimizer.parameters_gradient = self.parameters_gradient
 
         return self.parameters_gradient
 

@@ -45,7 +45,8 @@ nn_moons = NeruronNetworkLearning(
     dropout_rates = [0.1, 0.0, 0.02],
     activation=['Relu', 'Relu', 'Sigmoid'],
     Lr=0.1,
-    batch_size=32
+    batch_size=32,
+    scheduler_type='exponential'
 )
 
 #print("🧠 Neural Network Architecture for Moons:")
