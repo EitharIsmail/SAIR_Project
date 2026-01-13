@@ -64,7 +64,7 @@ Schedulers: Exponential and Step decay for the learning rate.
 Loss Functions: Mean Squared Error (MSE) and Binary Cross-Entropy (BCE).
 
 3. Regularization
-4. 
+   
 L1 (Lasso) and L2 (Ridge) regularization are integrated into the weight update step to penalize large weights and improve generalization.
 
 **📊 Evaluation & Visualization**
