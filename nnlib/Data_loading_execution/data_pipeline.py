@@ -8,28 +8,39 @@ class DataLoader:
     @staticmethod
     def load_mnist(folder_path):
         """Loads MNIST binary files from a directory"""
-        # Define the specific filenames as seen in your folder
-        img_path = os.path.join(folder_path, 'train-images-idx3-ubyte')
-        lbl_path = os.path.join(folder_path, 'train-labels-idx1-ubyte')
-
+        # CORRECTED: No leading backslash
+        img_path = os.path.join(folder_path, "train-images.idx3-ubyte")
+        lbl_path = os.path.join(folder_path, "train-labels.idx1-ubyte")
+        
+        print(f"Looking for images at: {img_path}")
+        print(f"Looking for labels at: {lbl_path}")
+        
+        # Check if files exist
+        if not os.path.exists(img_path):
+            raise FileNotFoundError(f"MNIST images file not found: {img_path}")
+        if not os.path.exists(lbl_path):
+            raise FileNotFoundError(f"MNIST labels file not found: {lbl_path}")
+        
         # 1. Read Images
         with open(img_path, 'rb') as f:
             # Magic number, Number of images, Rows, Cols
             magic, num, rows, cols = struct.unpack(">IIII", f.read(16))
             X = np.frombuffer(f.read(), dtype=np.uint8).reshape(num, rows * cols)
-
+        
         # 2. Read Labels
         with open(lbl_path, 'rb') as f:
             # Magic number, Number of items
             magic, num = struct.unpack(">II", f.read(8))
             y = np.frombuffer(f.read(), dtype=np.uint8)
-
+        
         # 3. Preprocessing: One-hot encode labels (0-9)
         num_classes = 10
         y_one_hot = np.eye(num_classes)[y]
         
-        # We divide by 255 here to normalize pixels to [0, 1] range immediately
-        return X.astype(float), y_one_hot
+        # Normalize pixel values to [0, 1]
+        X = X.astype(float) / 255.0
+        
+        return X, y_one_hot
 
     # ... keep train_val_test_split ...
     @staticmethod
