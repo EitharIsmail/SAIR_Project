@@ -3,7 +3,7 @@
 🧠 Custom Neural Network Library (built from Scratch using Numpy)
 This project is a modular, from-scratch implementation of a Multi-Layer Perceptron (MLP) using NumPy. It includes advanced features typically found in modern frameworks like PyTorch or TensorFlow, such as multiple activation functions, advanced optimizers (Adam, RMSProp), regularization, and learning rate scheduling.
 
-🚀 How to Run
+# 🚀 How to Run
 1. Prerequisites
 Ensure you have Python installed (3.8+ recommended) along with the following libraries:
 
@@ -28,7 +28,7 @@ Run the projecr
 python NeuronNetworkLibrary\src\main.py
 
 
-**2. File Structure**
+# 2. File Structure
 
 Ensure all project files are in the same directory (or properly path-referenced):
 
