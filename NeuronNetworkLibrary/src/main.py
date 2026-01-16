@@ -5,6 +5,7 @@ import numpy as np
 import os
 from Data_loading_execution.data_pipeline import DataLoader
 from NeuronNetworkLibrary.src.model_train import NeruronNetworkLearning
+from NeuronNetworkLibrary.src.evaluator import Evaluator
 
 def run_training(config_path):
     with open(config_path, 'r') as f:
@@ -38,7 +39,11 @@ def run_training(config_path):
     
     # 3. Train
     model_trainer.train(X_train, y_train, X_val, y_val, epochs=config.get('epochs', 100))
-    
+    evaluator = Evaluator(model_trainer)
+    evaluator.evaluate(X_test, y_test)
+    evaluator.plot_history()
+    evaluator.plot_confusion_matrix(X_test, y_test)
+        
     # 4. Save
     model_filename = f"{dataset_name}_model.pkl"
     with open(model_filename, 'wb') as f:

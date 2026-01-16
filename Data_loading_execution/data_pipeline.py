@@ -52,12 +52,19 @@ class DataLoader:
 
     @staticmethod
     def train_val_test_split(X, y, train_size=0.7, val_size=0.15):
-        
         n = X.shape[0]
         indices = np.random.permutation(n)
         
         train_end = int(n * train_size)
         val_end = int(n * (train_size + val_size))
         
-        train_idx, val_idx, test_idx = indices[:train_end], indices[train_end:val_end], indices[val_end:]
-        return X[train_idx], y[train_idx], X[val_idx], y[val_idx], X[test_idx], y[test_idx]
+        train_idx = indices[:train_end]
+        val_idx = indices[train_end:val_end]
+        test_idx = indices[val_end:]
+        
+        # We use np.atleast_2d to prevent the "0 dimensions" matmul error
+        return (
+            np.atleast_2d(X[train_idx]), np.atleast_2d(y[train_idx]),
+            np.atleast_2d(X[val_idx]),   np.atleast_2d(y[val_idx]),
+            np.atleast_2d(X[test_idx]),  np.atleast_2d(y[test_idx])
+        )
