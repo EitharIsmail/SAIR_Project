@@ -23,9 +23,12 @@ python3 -m venv .venv
 **Mac/Linux**
 source .venv/bin/activate
 
-Run the projecr
+Run the project
 
 python NeuronNetworkLibrary\src\main.py
+
+For UI view:
+python ui.py
 
 
 # 2. File Structure
