@@ -37,7 +37,7 @@ During implementation:
 
 
 
-**Optimizers:**
+***Optimizers:***
 
 Optimizers are algorithms that adjust neural network weights to minimize the loss function. They determine how and how much to update weights based on gradients during training.
 
