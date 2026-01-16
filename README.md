@@ -9,18 +9,18 @@ Ensure you have Python installed (3.8+ recommended) along with the following lib
 
 Bash
 
-# Windows
+**Windows**
 python -m venv .venv
 
-# Mac/Linux
+**Mac/Linux**
 python3 -m venv .venv
 
-Ativate the venv:
+# Ativate the venv:
 
-# Windows
+**Windows**
 .venv\Scripts\activate
 
-# Mac/Linux
+**Mac/Linux**
 source .venv/bin/activate
 
 Run the projecr
