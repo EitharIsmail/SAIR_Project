@@ -1,11 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "sair-project"
+name = "custom_nn_framework"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.13"
+description = "A scratch-built Neural Network framework with Gradio UI"
 dependencies = [
-    "matplotlib>=3.10.8",
-    "numpy>=2.3.5",
-    "pandas>=2.3.3",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "seaborn",
+    "scikit-learn",
+    "gradio",
+    "pyyaml",
 ]
+
+[tool.setuptools]
+packages = ["NeuronNetworkLibrary", "Data_loading_execution"]

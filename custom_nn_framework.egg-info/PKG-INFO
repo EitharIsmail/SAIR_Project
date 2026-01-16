@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: custom_nn_framework
+Version: 0.1.0
+Summary: A scratch-built Neural Network framework with Gradio UI
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+Requires-Dist: scikit-learn
+Requires-Dist: gradio
+Requires-Dist: pyyaml

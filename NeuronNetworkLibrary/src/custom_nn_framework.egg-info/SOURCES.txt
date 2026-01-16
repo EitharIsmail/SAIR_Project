@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+src/__init__.py
+src/denslayer.py
+src/evaluator.py
+src/learning_rate_S.py
+src/main.py
+src/mlp.py
+src/model_init_real_data.py
+src/model_train.py
+src/optimizer.py
+src/custom_nn_framework.egg-info/PKG-INFO
+src/custom_nn_framework.egg-info/SOURCES.txt
+src/custom_nn_framework.egg-info/dependency_links.txt
+src/custom_nn_framework.egg-info/requires.txt
+src/custom_nn_framework.egg-info/top_level.txt

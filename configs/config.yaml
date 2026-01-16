@@ -1,0 +1,19 @@
+wdbc:
+  data_path: "Data/Breast_Cancer/wdbc.data"
+  layer_size: [30, 16, 8, 1]
+  loss: "BCE"
+  activation: ["Relu", "Relu", "Sigmoid"]
+  learning_rate: 0.01
+  batch_size: 32
+  optimizer: "adam"
+  dropout_training: true
+  dropout_rates: [0.1, 0.1, 0.0]
+
+mnist:
+  data_path : "Data/MNIST"
+  layer_size: [784, 128, 64, 10]
+  loss: "CCE"
+  activation: ["Relu", "Relu", "Softmax"]
+  learning_rate: 0.001
+  batch_size: 64
+  optimizer: "adam"

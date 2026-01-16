@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: sair-project
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+Requires-Dist: matplotlib>=3.10.8
+Requires-Dist: numpy>=2.3.5
+Requires-Dist: pandas>=2.3.3
+
+# SAIR_Project
+This repo contains all the project I wrote while taking a n AI course with SAIR group
